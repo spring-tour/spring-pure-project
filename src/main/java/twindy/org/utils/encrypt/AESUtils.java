@@ -1,80 +1,158 @@
 package twindy.org.utils.encrypt;
 
-import org.apache.commons.codec.binary.Base64;
+import twindy.org.utils.ConstantUtils;
 
 import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.SecureRandom;
+import java.io.UnsupportedEncodingException;
 
 /**
- * 描述：AES加解密
+ * 描述：简单的AES加密方式
  *
  * @author twindy
  * @time 2017-04-18
  */
 public class AESUtils {
 
-    private static final String DEFULAT_KEY = "&%1234574etUSDYA09iUSAYWQT#@!ASZASDAX)@QAWECD=&RQWADASA";
-
+    private static final String Algorithm = "AES";
+    private static final String DEFAULT_KEY = "ADdu!0#sdj%(&9dgfyLOVEHYABBYSTWINDYORGDnduH345$^32<>^&())hhlsav";
     /**
-     * AES 解密
-     * @param encryptValue
-     * @param key
-     * @return
-     * @throws Exception
+     * the password for decrypt read from config file ,config file key is AES.passowrd
      */
-    protected static String decrypt(String encryptValue, String key) throws Exception {
-        return aesDecryptByBytes(base64Decode(encryptValue), key);
+    public static String encrypt(String plainText){
+        return encrypt(plainText, DEFAULT_KEY);
     }
 
     /**
-     * AES加密
-     * @param value
-     * @param key
+     * 加密
+     * @param plainText 明文
+     * @param pwd 16位的随机码
      * @return
-     * @throws Exception
      */
-    protected static String encrypt(String value, String key) throws Exception {
-        return base64Encode(aesEncryptToBytes(value, key));
+    public static String encrypt(String plainText, String pwd) {
+        try{
+            return toHex(encrypt(plainText.getBytes("UTF-8"), pwd));
+        }catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    /**
+     * the password for decrypt read from config file ,config file key is AES.passowrd
+     */
+    public static String decrypt(String cipherText){
+        return decrypt(cipherText, DEFAULT_KEY);
     }
 
-    private static String base64Encode(byte[] bytes){
-        return Base64.encodeBase64(bytes).toString();
+    /**
+     * 解密 以String密文输入,String明文输出
+     * @param pwd
+     * @return
+     */
+    public static String decrypt(String cipherText, String pwd) {
+        try{
+            byte[] bytes = decrypt(hexToBytes(cipherText), pwd);
+            return new String(bytes,"UTF-8");
+        }catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
+    /**
+     * 加密以byte[]明文输入,byte[]密文输出
+     * @param byteS
+     * @return
+     */
+    public static byte[] encrypt(byte[] byteS,String pwd) {
 
-    private static byte[] base64Decode(String base64Code) throws Exception {
-        return base64Code == null ? null : Base64.decodeBase64(base64Code);
+        byte[] byteFina = null;
+        Cipher cipher;
+        try {
+            cipher = Cipher.getInstance(Algorithm);
+            SecretKeySpec keySpec = new SecretKeySpec(getKey(pwd), "AES");
+            cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+            byteFina = cipher.doFinal(byteS);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            cipher = null;
+        }
+        return byteFina;
     }
 
-    private static byte[] aesEncryptToBytes(String content, String encryptKey) throws Exception {
-        KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-        keyGen.init(128, new SecureRandom(encryptKey.getBytes()));
-
-        Cipher cipher = Cipher.getInstance("AES");
-        cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(keyGen.generateKey().getEncoded(), "AES"));
-
-        return cipher.doFinal(content.getBytes("utf-8"));
+    /**
+     * 解密以byte[]密文输入,以byte[]明文输出
+     * @param byteD
+     * @return
+     */
+    public static byte[] decrypt(byte[] byteD,String pwd) {
+        Cipher cipher;
+        byte[] byteFina = null;
+        try {
+            cipher = Cipher.getInstance(Algorithm);
+            SecretKeySpec keySpec = new SecretKeySpec(getKey(pwd), "AES");
+            cipher.init(Cipher.DECRYPT_MODE, keySpec);
+            byteFina = cipher.doFinal(byteD);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            cipher = null;
+        }
+        return byteFina;
     }
 
-    private static String aesDecryptByBytes(byte[] encryptBytes, String decryptKey) throws Exception {
-        KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-        keyGen.init(128, new SecureRandom(decryptKey.getBytes()));
+    private static byte[] getKey(String password) throws UnsupportedEncodingException{
+        // 使用256位密码
+        if(password.length() > 16)
+            password = password.substring(0, 16);
+        else if(password.length() < 16){
+            int count = (16 - password.length());
+            for(int i=0;i<count;i++){
+                password+="0";
+            }
+        }
+        return password.getBytes("UTF-8");
+    }
 
-        Cipher cipher = Cipher.getInstance("AES");
-        cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(keyGen.generateKey().getEncoded(), "AES"));
-        byte[] decryptBytes = cipher.doFinal(encryptBytes);
+    /**
+     *  Convert byte array to hex string
+     */
+    public static String toHex(byte[] bytes){
+        StringBuffer sb = new StringBuffer(bytes.length * 3);
+        for (int i = 0; i < bytes.length; i++) {
+            int val = ((int) bytes[i]) & 0xff;
+            if (val < 16) {
+                sb.append("0");
+            }
+            sb.append(Integer.toHexString(val));
+        }
 
-        return new String(decryptBytes);
+        return sb.toString();
+    }
+
+    /**
+     * Convert hex string to byte array
+     * @param str
+     * @return
+     */
+    public static byte[] hexToBytes(String str){
+        int l = str.length();
+        if ((l % 2) != 0) {
+            throw new IllegalArgumentException("长度不是偶数!");
+        }
+        byte[] bytes = new byte[l/2];
+        for(int i=0;i<l;i=i+2){
+            String item = str.substring(i, i+2);
+            bytes[i/2] = (byte)Integer.parseInt(item, 16);
+        }
+
+        return bytes;
     }
 
     public static void main(String[] args) {
-        try {
-            System.out.print(AESUtils.encrypt("asdasSd", "1234567897897894"));
-        } catch (Exception E) {
-
-        }
-
+        String a = ConstantUtils.SYMBOL_ALL;
+        String b = AESUtils.encrypt(a);
+        System.out.println(a);
+        System.out.println(b);
+        System.out.println(AESUtils.decrypt(b));
     }
 }
