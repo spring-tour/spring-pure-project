@@ -8,7 +8,7 @@ import org.springframework.core.io.Resource;
 /**
  * 描述：UrlResource
  *
- * @author zhijun_wang
+ * @author twindy
  * @time 2017-04-11
  */
 public class ResourceTest {

@@ -2,8 +2,6 @@ package twindy.org.utils;
 
 /**
  * 描述：
- *
- * @author zhijun_wang
  * @time 2017-04-19
  */
 public class ConstantUtils {
