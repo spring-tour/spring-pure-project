@@ -1,6 +1,6 @@
 package twindy.org.utils.encrypt;
 
-import twindy.org.utils.ConstantUtils;
+import twindy.org.utils.HexUtils;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -31,7 +31,7 @@ public class AESUtils {
      */
     public static String encrypt(String plainText, String pwd) {
         try{
-            return toHex(encrypt(plainText.getBytes("UTF-8"), pwd));
+            return HexUtils.toHex(encrypt(plainText.getBytes("UTF-8"), pwd));
         }catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -50,7 +50,7 @@ public class AESUtils {
      */
     public static String decrypt(String cipherText, String pwd) {
         try{
-            byte[] bytes = decrypt(hexToBytes(cipherText), pwd);
+            byte[] bytes = decrypt(HexUtils.hexToBytes(cipherText), pwd);
             return new String(bytes,"UTF-8");
         }catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
@@ -111,48 +111,5 @@ public class AESUtils {
             }
         }
         return password.getBytes("UTF-8");
-    }
-
-    /**
-     *  Convert byte array to hex string
-     */
-    public static String toHex(byte[] bytes){
-        StringBuffer sb = new StringBuffer(bytes.length * 3);
-        for (int i = 0; i < bytes.length; i++) {
-            int val = ((int) bytes[i]) & 0xff;
-            if (val < 16) {
-                sb.append("0");
-            }
-            sb.append(Integer.toHexString(val));
-        }
-
-        return sb.toString();
-    }
-
-    /**
-     * Convert hex string to byte array
-     * @param str
-     * @return
-     */
-    public static byte[] hexToBytes(String str){
-        int l = str.length();
-        if ((l % 2) != 0) {
-            throw new IllegalArgumentException("长度不是偶数!");
-        }
-        byte[] bytes = new byte[l/2];
-        for(int i=0;i<l;i=i+2){
-            String item = str.substring(i, i+2);
-            bytes[i/2] = (byte)Integer.parseInt(item, 16);
-        }
-
-        return bytes;
-    }
-
-    public static void main(String[] args) {
-        String a = ConstantUtils.SYMBOL_ALL;
-        String b = AESUtils.encrypt(a);
-        System.out.println(a);
-        System.out.println(b);
-        System.out.println(AESUtils.decrypt(b));
     }
 }
