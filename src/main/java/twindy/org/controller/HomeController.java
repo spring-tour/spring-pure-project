@@ -26,5 +26,4 @@ public class HomeController {
     public String homePage(HttpServletRequest request, HttpServletResponse response){
         return "home";
     }
-
 }

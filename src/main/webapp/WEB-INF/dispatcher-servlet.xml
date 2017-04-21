@@ -12,10 +12,10 @@
            http://www.springframework.org/schema/context
            http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <!--静态资源特殊处理-->
-    <mvc:resources mapping="/static/**" location="/static/">
-        <!--<mvc:cache-control max-age="3600" cache-public="true"/>-->
-    </mvc:resources>
+    <!--&lt;!&ndash;静态资源特殊处理&ndash;&gt;-->
+    <!--<mvc:resources mapping="/static/**" location="/static/">-->
+        <!--&lt;!&ndash;<mvc:cache-control max-age="3600" cache-public="true"/>&ndash;&gt;-->
+    <!--</mvc:resources>-->
 
     <!--激活注解驱动特性-->
     <mvc:annotation-driven />
@@ -23,7 +23,7 @@
     <!--bean 扫描-->
     <context:component-scan base-package="twindy.org.controller" />
 
-    <!--<mvc:default-servlet-handler/>-->
+    <mvc:default-servlet-handler/>
 
     <!--配置视图解析-->
     <bean id="viewResolve" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
