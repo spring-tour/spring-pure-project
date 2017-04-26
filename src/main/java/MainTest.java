@@ -1,3 +1,5 @@
+import twindy.org.utils.UUIDUtils;
+
 /**
  * 描述：
  *
@@ -6,6 +8,7 @@
  */
 public class MainTest {
     public static void main(String[] args) {
-        System.out.print(0x131A);
+
+        System.out.println(UUIDUtils.randomUUID());
     }
 }
